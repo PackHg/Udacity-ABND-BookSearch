@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Book Search</string>
 
-    <string name="help">Help</string>
     <string name="search">Search</string>
     <string name="search_button">Search button</string>
     <string name="search_enter">Enter keywords</string>
+    <string name="please_enter">Please enter keywords</string>
 </resources>
