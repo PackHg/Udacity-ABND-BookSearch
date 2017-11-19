@@ -5,4 +5,8 @@
     <string name="search_button">Search button</string>
     <string name="search_enter">Enter keywords</string>
     <string name="please_enter">Please enter keywords</string>
+
+    <string name="no_internet">No Internet connection</string>
+
+
 </resources>
