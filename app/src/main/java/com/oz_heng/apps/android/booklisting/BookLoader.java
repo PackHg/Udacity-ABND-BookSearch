@@ -3,6 +3,8 @@ package com.oz_heng.apps.android.booklisting;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 
+import java.util.List;
+
 import static com.oz_heng.apps.android.booklisting.Utils.Query.fetchBookData;
 
 
@@ -10,7 +12,7 @@ import static com.oz_heng.apps.android.booklisting.Utils.Query.fetchBookData;
  * For loading a list of books by using an AsyncTask to perform the
  * network request to the given URL.
  */
-public class BookLoader extends AsyncTaskLoader<String> {
+public class BookLoader extends AsyncTaskLoader<List<Book>> {
     private static final String LOG_TAG = BookLoader.class.getSimpleName();
 
   // Query URL
@@ -31,9 +33,9 @@ public class BookLoader extends AsyncTaskLoader<String> {
      * @return
      */
     @Override
-    public String loadInBackground() {
+    public List<Book> loadInBackground() {
         if (mUrl == null) {
-            return "";
+            return null;
         }
 
         return fetchBookData(mUrl);

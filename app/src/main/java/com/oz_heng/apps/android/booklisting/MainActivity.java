@@ -12,11 +12,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import java.util.List;
+
 import static com.oz_heng.apps.android.booklisting.Utils.Helper.showToast;
 import static com.oz_heng.apps.android.booklisting.Utils.Query.isNetworkConnected;
 
 public class MainActivity extends AppCompatActivity
-    implements LoaderManager.LoaderCallbacks<String> {
+    implements LoaderManager.LoaderCallbacks<List<Book>> {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     // Base URL for querying Google Book API
@@ -27,9 +29,9 @@ public class MainActivity extends AppCompatActivity
 
 
     // Text entered by the user.
-    private String userText;
+    private String mUserText;
     // Keywords entered by the user.
-    private String userKeywords;
+    private String mUserKeywords;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -43,10 +45,10 @@ public class MainActivity extends AppCompatActivity
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                userText = editText.getText().toString().trim();
+                mUserText = editText.getText().toString().trim();
 
                 // If the entered text is empty, alert the user with a Toast message and do nothing.
-                if (userText.isEmpty()) {
+                if (mUserText.isEmpty()) {
                     showToast(MainActivity.this, getString(R.string.please_enter));
                     return;
                 }
@@ -54,15 +56,17 @@ public class MainActivity extends AppCompatActivity
                 hideSoftKeyboard();
 
                 // Split the entered text into keywords.
-                String[] keywords  =  userText.split("\\s+");
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(keywords[0]);
+                String[] keywords  =  mUserText.split("\\s+");
+//                StringBuilder stringBuilder = new StringBuilder();
+//                stringBuilder.append(keywords[0]);
+                mUserKeywords = keywords[0];
                 for (int i=1; i < keywords.length; i++) {
-                    stringBuilder.append("+");
-                    stringBuilder.append(keywords[i]);
+//                    stringBuilder.append("+");
+//                    stringBuilder.append(keywords[i]);
+                    mUserKeywords = mUserKeywords.concat("+" + keywords[i]);
                 }
-                userKeywords = stringBuilder.toString();
-                Log.v(LOG_TAG, "userKeywords: " + userKeywords);
+//                mUserKeywords = stringBuilder.toString();
+                Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
 
                 // If there's network connection, fetch the data.
                 if (isNetworkConnected(MainActivity.this)) {
@@ -76,13 +80,12 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-     @Override
-    public Loader<String> onCreateLoader(int i, Bundle bundle) {
+    @Override
+    public Loader<List<Book>> onCreateLoader(int i, Bundle bundle) {
 
          Uri baseUri = Uri.parse(GOOGLE_BOOK_API_REQUEST_URL);
          Uri.Builder uriBuilder = baseUri.buildUpon();
-
-         uriBuilder.appendQueryParameter("q", userKeywords);
+         uriBuilder.appendQueryParameter("q", mUserKeywords);
 
          Log.v(LOG_TAG, "onCreateLoader - uriBuilder.toString(): " + uriBuilder.toString());
 
@@ -91,17 +94,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onLoadFinished(Loader<String> loader, String s) {
-        if (s != null && !s.isEmpty()) {
+    public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
+        if (books != null && !books.isEmpty()) {
             showToast(this, "onLoadFinished() - Json response has been fetched. See Logcat.");
-            Log.v(LOG_TAG, "onLoadFinished - Json response: " + s);
+            for (int i = 0; i < books.size(); i++) {
+                Log.v(LOG_TAG, "onLoadFinished - Books(" + i + "): " +
+                        books.get(i).toString());
+            }
         } else {
             showToast(this, "No book data found");
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<String> loader) {
+    public void onLoaderReset(Loader<List<Book>> loader) {
 
     }
 

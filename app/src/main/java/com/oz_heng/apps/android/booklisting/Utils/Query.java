@@ -1,9 +1,17 @@
 package com.oz_heng.apps.android.booklisting.Utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+
+import com.oz_heng.apps.android.booklisting.Book;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,6 +21,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper methods for getting data the Google Books API.
@@ -24,12 +34,12 @@ public final class Query {
     }
 
     /**
-     * Query the USGS dataset and return a List of Book objects.
+     * Query Google Book API and return a List of Book objects.
      *
      * @param urlString
      * @return
      */
-    public static String fetchBookData(String urlString) {
+    public static List<Book> fetchBookData(String urlString) {
 //    public static List<Earthquake> fetchEarthquakeData(String urlString) {
 
         // Fot testing loading indicator
@@ -46,13 +56,13 @@ public final class Query {
         String jsonResponse = null;
         try {
             jsonResponse = makeHttpRequest(url);
+            Log.v(LOG_TAG, "jsonResponse :" + jsonResponse);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
 
-        //  Return the list of {@link Earthquake}s extracted from the JSON response
-//        return extractEarthquakesFromJson(jsonResponse);
-        return jsonResponse;
+        //  Return a list of Books from the JSON response
+        return extractBooksfromJsonString(jsonResponse);
     }
 
     /**
@@ -142,63 +152,75 @@ public final class Query {
         return output.toString();
     }
 
-//    /**
-//     * Return an {@link List} of {@link Earthquake} objects that has been built up from
-//     * parsing a JSON response.
-//     */
-//    private static List<Earthquake> extractEarthquakesFromJson(String earthquakesJson) {
-//        // If the JSON string is empty or null, then return early.
-//        if (earthquakesJson.isEmpty()) {
-//            return null;
-//        }
-//
-//        // The items that need to be parsed out of the JSON response
-//        final String FEATURES = "features";
-//        final String PROPERTIES ="properties";
-//        final String MAG = "mag";
-//        final String PLACE = "place";
-//        final String TIME = "time";
-//        final String URL = "url";
-//
-//        // Create an empty ArrayList that we can start adding earthquakes to
-//        List<Earthquake> earthquakes = new ArrayList<>();
-//
-//        // Try to parse the SAMPLE_JSON_RESPONSE. If there's a problem with the way the JSON
-//        // is formatted, a JSONException exception object will be thrown.
-//        // Catch the exception so the app doesn't crash, and print the error message to the logs.
-//        try {
-//
-//            // Crate a JSONObject from the earthquakesJso parameter
-//            JSONObject baseJsonResponse = new JSONObject(earthquakesJson);
-//
-//            // Extract the JSONArray associated with the key called "features"
-//            // which represents a list of features (or eathquakes
-//            JSONArray features = baseJsonResponse.getJSONArray(FEATURES);
-//
-//            // For each item of the "features" array. reach the JSONObject "properties" and extract
-//            // the magnitude, place and date data, and add them into the earthquake list.
-//            for (int i = 0; i < features.length(); i++) {
-//                JSONObject properties = features.getJSONObject(i).getJSONObject(PROPERTIES);
-//
-//                double magnitude = properties.getDouble(MAG);
-//                String place = properties.getString(PLACE);
-//                Date date = new Date(properties.getLong(TIME));
-//                String url = properties.getString(URL);
-//
-//                earthquakes.add( new Earthquake(magnitude, place, date, url) );
-//            }
-//
-//
-//        } catch (JSONException e) {
-//            // If an error is thrown when executing any of the above statements in the "try" block,
-//            // catch the exception here, so the app doesn't crash. Print a log message
-//            // with the message from the exception.
-//            Log.e(LOG_TAG, "Problem parsing the earthquake JSON results.", e);
-//        }
-//
-//        // Return the list of earthquakes
-//        return earthquakes;
-//    }
+    /**
+     * Return a {@link List} of {@link Book} objects by parsing a JSON String.
+     * @param jsonString String to be parsed.
+     */
+    public static ArrayList<Book> extractBooksfromJsonString(String jsonString) {
+
+        if (jsonString == null || jsonString.isEmpty()) {
+            return null;
+        }
+
+        // Keys for parsing
+        final String KIND = "kind";
+        final String ITEMS = "items";
+        final String VOLUME_INFO = "volumeInfo";
+        final String TITLE = "title";
+        final String AUTHORS = "authors";
+        final String PUBLISHED_DATE = "publishedDate";
+        final String IMAGE_LINKS = "imageLinks";
+        final String THUMBNAIL = "thumbnail";
+        final String CANONICAL_VOULUME_LINK = "canonicalVolumeLink";
+
+        ArrayList<Book> bookArrayList = new ArrayList<Book>();
+
+        try {
+            JSONObject base = new JSONObject(jsonString);
+//            JSONObject response = base.getJSONObject(KIND);
+
+            JSONArray items = base.getJSONArray(ITEMS);
+            for (int i = 0; i < items.length(); i++) {
+                JSONObject volumeInfo = items.getJSONObject(i).getJSONObject(VOLUME_INFO);
+
+                // Parse title and authors.
+                String title = volumeInfo.getString(TITLE);
+                JSONArray authorArray = volumeInfo.getJSONArray(AUTHORS);
+                String authors = "";
+                if (authorArray.length() > 0) {
+                    authors = authors.concat(authorArray.getString(0));
+                    Log.v(LOG_TAG, "authorArray.getString(0): " +
+                            authorArray.getString(0));
+                    for (int j = 1; j < authorArray.length(); j++) {
+                        Log.v(LOG_TAG, "authorArray.getString(" + j + "): "
+                                + authorArray.getString(j));
+                        authors = authors.concat(", " + authorArray.getString(j));
+                    }
+                    Log.v(LOG_TAG, "authors: " + authors);
+                }
+
+                String publishedDate = volumeInfo.getString(PUBLISHED_DATE);
+
+                // Get the thumbnail image.
+                JSONObject imageLinks = volumeInfo.getJSONObject(IMAGE_LINKS);
+                String thumbnailUrl = imageLinks.getString(THUMBNAIL);
+                Bitmap thumbnailImage = null;
+                if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+                    thumbnailImage = getBitmapFromURL(thumbnailUrl);
+                }
+
+                String bookUrl = volumeInfo.getString(CANONICAL_VOULUME_LINK);
+
+                bookArrayList.add( new Book(title, authors, publishedDate, bookUrl,
+                        thumbnailImage) );
+            }
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Problem in parsing the JSON string", e);
+        }
+
+        return bookArrayList;
+    }
+
 
     /**
      * Check the network connectivity.
@@ -215,4 +237,46 @@ public final class Query {
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
+
+    /**
+     * Load an image from a given URL and turn it into a Bitmap.
+     * Return null if there's issue in getting the {@link Bitmap} or the src is empty.
+     *
+     * @param srcUrl
+     * @return
+     */
+    public static Bitmap getBitmapFromURL(String srcUrl) {
+
+        if (srcUrl.isEmpty()) {
+            return null;
+        }
+
+        HttpURLConnection connection = null;
+        InputStream input = null;
+
+        try {
+            URL url = new URL(srcUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            input = connection.getInputStream();
+            // Use Android’s BitmapFactory class to decode the input stream
+            return BitmapFactory.decodeStream(input);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem in getting a Bitmap from the given URL string.", e);
+            return null;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Problem in closing the inputStream.", e);
+                }
+            }
+        }
+    }
+
 }
