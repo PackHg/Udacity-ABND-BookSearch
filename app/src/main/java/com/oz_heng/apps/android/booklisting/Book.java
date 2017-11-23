@@ -9,15 +9,18 @@ public class Book {
     private String mTitle;
     private String mAuthors;
     private String mPublishedDate;
+    private String mDescription;
     private String mUrl;
-    private Bitmap mThumbnailImage;
+    private Bitmap mThumbnail;
 
-    public Book(String title, String authors, String date, String url, Bitmap thumbnailImage) {
+    public Book(String title, String authors, String date, String description,
+                String url, Bitmap thumbnailImage) {
         mTitle = title;
         mAuthors = authors;
         mPublishedDate = date;
+        mDescription = description;
         mUrl = url;
-        mThumbnailImage = thumbnailImage;
+        mThumbnail = thumbnailImage;
     }
 
     public String getTitle() {
@@ -32,19 +35,23 @@ public class Book {
         return mPublishedDate;
     }
 
+    public String getDescription() {
+        return mDescription;
+    }
+
     public String getUrl() {
         return mUrl;
     }
 
-    public Bitmap getThumbnailImage() {
-        return mThumbnailImage;
+    public Bitmap getThumbnail() {
+        return mThumbnail;
     }
 
     @Override
     public String toString() {
-        final String COMMA = ", ";
+        final String NL = "\n";
 
-        return getTitle() + COMMA + getAuthors() + COMMA + getPublishedDate()
-                + COMMA + getUrl();
+        return getTitle() + NL + getAuthors() + NL + getPublishedDate()
+                + NL + getDescription() + NL + getUrl();
     }
 }

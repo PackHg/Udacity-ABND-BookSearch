@@ -8,5 +8,7 @@
 
     <string name="no_internet">No Internet connection</string>
 
+    <string name="minus">-</string>
+
 
 </resources>

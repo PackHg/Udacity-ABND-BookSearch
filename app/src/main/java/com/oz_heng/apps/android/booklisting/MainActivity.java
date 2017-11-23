@@ -11,7 +11,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.oz_heng.apps.android.booklisting.Utils.Helper.showToast;
@@ -27,11 +29,12 @@ public class MainActivity extends AppCompatActivity
     // Constant value for the book loader ID
     private static final int BOOK_LOADER_ID = 1;
 
-
     // Text entered by the user.
     private String mUserText;
     // Keywords entered by the user.
     private String mUserKeywords;
+
+    private BookAdapter mBookAdapter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -57,15 +60,10 @@ public class MainActivity extends AppCompatActivity
 
                 // Split the entered text into keywords.
                 String[] keywords  =  mUserText.split("\\s+");
-//                StringBuilder stringBuilder = new StringBuilder();
-//                stringBuilder.append(keywords[0]);
                 mUserKeywords = keywords[0];
                 for (int i=1; i < keywords.length; i++) {
-//                    stringBuilder.append("+");
-//                    stringBuilder.append(keywords[i]);
                     mUserKeywords = mUserKeywords.concat("+" + keywords[i]);
                 }
-//                mUserKeywords = stringBuilder.toString();
                 Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
 
                 // If there's network connection, fetch the data.
@@ -78,6 +76,10 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // Setup listView with a BookAdapter.
+        ListView listView = (ListView) findViewById(R.id.list_view);
+        mBookAdapter = new BookAdapter(this, new ArrayList<Book>());
+        listView.setAdapter(mBookAdapter);
     }
 
     @Override
@@ -95,12 +97,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
+
+        // Clear the adapter of preview book data.
+        mBookAdapter.clear();
+
         if (books != null && !books.isEmpty()) {
             showToast(this, "onLoadFinished() - Json response has been fetched. See Logcat.");
             for (int i = 0; i < books.size(); i++) {
                 Log.v(LOG_TAG, "onLoadFinished - Books(" + i + "): " +
                         books.get(i).toString());
             }
+            mBookAdapter.addAll(books);
         } else {
             showToast(this, "No book data found");
         }
@@ -108,7 +115,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(Loader<List<Book>> loader) {
-
+        mBookAdapter.clear();
     }
 
     /**

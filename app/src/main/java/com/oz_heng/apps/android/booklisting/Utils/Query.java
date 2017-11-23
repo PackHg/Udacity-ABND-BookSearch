@@ -169,6 +169,7 @@ public final class Query {
         final String TITLE = "title";
         final String AUTHORS = "authors";
         final String PUBLISHED_DATE = "publishedDate";
+        final String DESCRIPTION = "description";
         final String IMAGE_LINKS = "imageLinks";
         final String THUMBNAIL = "thumbnail";
         final String CANONICAL_VOULUME_LINK = "canonicalVolumeLink";
@@ -179,40 +180,57 @@ public final class Query {
             JSONObject base = new JSONObject(jsonString);
 //            JSONObject response = base.getJSONObject(KIND);
 
+            String title = "";
+            String authors = "";
+            String publishedDate = "";
+            String bookUrl = "";
+            Bitmap thumbnailImage = null;
+            String description = "";
+
             JSONArray items = base.getJSONArray(ITEMS);
             for (int i = 0; i < items.length(); i++) {
-                JSONObject volumeInfo = items.getJSONObject(i).getJSONObject(VOLUME_INFO);
+                try {
+                    JSONObject volumeInfo = items.getJSONObject(i).getJSONObject(VOLUME_INFO);
 
-                // Parse title and authors.
-                String title = volumeInfo.getString(TITLE);
-                JSONArray authorArray = volumeInfo.getJSONArray(AUTHORS);
-                String authors = "";
-                if (authorArray.length() > 0) {
-                    authors = authors.concat(authorArray.getString(0));
-                    Log.v(LOG_TAG, "authorArray.getString(0): " +
-                            authorArray.getString(0));
-                    for (int j = 1; j < authorArray.length(); j++) {
-                        Log.v(LOG_TAG, "authorArray.getString(" + j + "): "
-                                + authorArray.getString(j));
-                        authors = authors.concat(", " + authorArray.getString(j));
+                    // Parse title and authors.
+                    title = volumeInfo.getString(TITLE);
+                    JSONArray authorArray = volumeInfo.getJSONArray(AUTHORS);
+                    authors = "";
+                    if (authorArray.length() > 0) {
+                        authors = authors.concat(authorArray.getString(0));
+                        Log.v(LOG_TAG, "authorArray.getString(0): " +
+                                authorArray.getString(0));
+                        for (int j = 1; j < authorArray.length(); j++) {
+                            Log.v(LOG_TAG, "authorArray.getString(" + j + "): "
+                                    + authorArray.getString(j));
+                            authors = authors.concat(", " + authorArray.getString(j));
+                        }
+                        Log.v(LOG_TAG, "authors: " + authors);
                     }
-                    Log.v(LOG_TAG, "authors: " + authors);
+
+                    publishedDate = volumeInfo.getString(PUBLISHED_DATE);
+
+                    // Get the thumbnail image.
+                    JSONObject imageLinks = volumeInfo.getJSONObject(IMAGE_LINKS);
+                    String thumbnailUrl = imageLinks.getString(THUMBNAIL);
+                    thumbnailImage = null;
+                    if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+                        thumbnailImage = getBitmapFromURL(thumbnailUrl);
+                    }
+
+                    bookUrl = volumeInfo.getString(CANONICAL_VOULUME_LINK);
+                    description = volumeInfo.getString(DESCRIPTION);
+
                 }
-
-                String publishedDate = volumeInfo.getString(PUBLISHED_DATE);
-
-                // Get the thumbnail image.
-                JSONObject imageLinks = volumeInfo.getJSONObject(IMAGE_LINKS);
-                String thumbnailUrl = imageLinks.getString(THUMBNAIL);
-                Bitmap thumbnailImage = null;
-                if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
-                    thumbnailImage = getBitmapFromURL(thumbnailUrl);
+                catch (JSONException e) {
+                    if (e.getMessage().contains("No value for description")) {
+                        description = "";
+                    } else {
+                        Log.e(LOG_TAG, "Problem in parsing the JSON string", e);
+                    }
                 }
-
-                String bookUrl = volumeInfo.getString(CANONICAL_VOULUME_LINK);
-
-                bookArrayList.add( new Book(title, authors, publishedDate, bookUrl,
-                        thumbnailImage) );
+                bookArrayList.add(new Book(title, authors, publishedDate, description, bookUrl,
+                        thumbnailImage));
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Problem in parsing the JSON string", e);
@@ -220,7 +238,6 @@ public final class Query {
 
         return bookArrayList;
     }
-
 
     /**
      * Check the network connectivity.
