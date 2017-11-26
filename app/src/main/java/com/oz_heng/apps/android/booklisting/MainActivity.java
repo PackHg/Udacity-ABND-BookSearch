@@ -12,12 +12,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.oz_heng.apps.android.booklisting.Utils.Helper.showToast;
 import static com.oz_heng.apps.android.booklisting.Utils.Query.isNetworkConnected;
+
+// TODO: handle case "JSONException: No value for authors"?
 
 public class MainActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<List<Book>> {
@@ -29,10 +32,17 @@ public class MainActivity extends AppCompatActivity
     // Constant value for the book loader ID
     private static final int BOOK_LOADER_ID = 1;
 
-    // Text entered by the user.
-    private String mUserText;
+    // Query text entered by the user.
+    private String mUserQueryText;
     // Keywords entered by the user.
     private String mUserKeywords;
+    // Is it the first search?
+    private boolean mIsFirstSearch;
+
+    // Text view that is displayed when the listView is empty.
+    private TextView mEmptyView;
+    // Loading idicator.
+    private View mProgressBar;
 
     private BookAdapter mBookAdapter;
 
@@ -41,38 +51,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final EditText editText = findViewById(R.id.user_entered_text);
+        mIsFirstSearch = true;
 
         // Set the search button to trigger the appropriate action.
-        ImageButton searchButton = (ImageButton) findViewById(R.id.button_search);
+        ImageButton searchButton = findViewById(R.id.button_search);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mUserText = editText.getText().toString().trim();
-
-                // If the entered text is empty, alert the user with a Toast message and do nothing.
-                if (mUserText.isEmpty()) {
-                    showToast(MainActivity.this, getString(R.string.please_enter));
-                    return;
-                }
-
-                hideSoftKeyboard();
-
-                // Split the entered text into keywords.
-                String[] keywords  =  mUserText.split("\\s+");
-                mUserKeywords = keywords[0];
-                for (int i=1; i < keywords.length; i++) {
-                    mUserKeywords = mUserKeywords.concat("+" + keywords[i]);
-                }
-                Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
-
-                // If there's network connection, fetch the data.
-                if (isNetworkConnected(MainActivity.this)) {
-                    LoaderManager loaderManager = getLoaderManager();
-                    loaderManager.initLoader(BOOK_LOADER_ID, null, MainActivity.this);
-                } else {
-                    showToast(MainActivity.this, getString(R.string.no_internet));
-                }
+                search();
             }
         });
 
@@ -80,6 +66,59 @@ public class MainActivity extends AppCompatActivity
         ListView listView = (ListView) findViewById(R.id.list_view);
         mBookAdapter = new BookAdapter(this, new ArrayList<Book>());
         listView.setAdapter(mBookAdapter);
+
+        // Set listView with an empty view.
+        mEmptyView = findViewById(R.id.empty_view);
+        listView.setEmptyView(mEmptyView);
+        mEmptyView.setVisibility(View.GONE);
+
+        mProgressBar = findViewById(R.id.loading_spinner);
+        mProgressBar.setVisibility(View.GONE);
+    }
+
+    /**
+     * Search based on the text entered by the user.
+     */
+    private void search() {
+        mEmptyView.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
+
+        EditText editText = findViewById(R.id.user_entered_text);
+
+        mUserQueryText = editText.getText().toString().trim();
+
+        // If the entered text is empty, alert the user with a Toast message and do nothing.
+        if (mUserQueryText.isEmpty()) {
+            showToast(MainActivity.this, getString(R.string.please_enter));
+            return;
+        }
+
+        hideSoftKeyboard();
+
+        // Split the entered text into keywords.
+        String[] keywords  =  mUserQueryText.split("\\s+");
+        mUserKeywords = keywords[0];
+        for (int i=1; i < keywords.length; i++) {
+            mUserKeywords = mUserKeywords.concat("+" + keywords[i]);
+        }
+        Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
+
+        // If there's network connection, fetch the data.
+        if (isNetworkConnected(MainActivity.this)) {
+            LoaderManager loaderManager = getLoaderManager();
+
+            if (mIsFirstSearch) {
+                loaderManager.initLoader(BOOK_LOADER_ID, null, MainActivity.this);
+                Log.v(LOG_TAG, "loaderManager.initLoader");
+                mIsFirstSearch = false;
+            } else {
+                loaderManager.restartLoader(BOOK_LOADER_ID, null,MainActivity.this);
+            }
+        } else {
+            mProgressBar.setVisibility(View.GONE);
+            mEmptyView.setVisibility(View.VISIBLE);
+            mEmptyView.setText(R.string.no_internet_connection);
+        }
     }
 
     @Override
@@ -98,6 +137,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
 
+        mProgressBar.setVisibility(View.GONE);
+
         // Clear the adapter of preview book data.
         mBookAdapter.clear();
 
@@ -109,7 +150,8 @@ public class MainActivity extends AppCompatActivity
             }
             mBookAdapter.addAll(books);
         } else {
-            showToast(this, "No book data found");
+            mEmptyView.setVisibility(View.VISIBLE);
+            mEmptyView.setText(R.string.no_book_data);
         }
     }
 

@@ -36,18 +36,10 @@ public final class Query {
     /**
      * Query Google Book API and return a List of Book objects.
      *
-     * @param urlString
-     * @return
+     * @param urlString String containing the URL.
+     * @return List of Book data.
      */
     public static List<Book> fetchBookData(String urlString) {
-//    public static List<Earthquake> fetchEarthquakeData(String urlString) {
-
-        // Fot testing loading indicator
-//        try {
-//            Thread.sleep(2000 /** milliseconds */);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
 
         // Create URL object
         URL url = createUrl(urlString);
@@ -68,8 +60,8 @@ public final class Query {
     /**
      * Create an URL from the the given URL string.
      *
-     * @param urlString
-     * @return
+     * @param urlString String containing the URL.
+     * @return an URL.
      */
     private static URL createUrl(String urlString) {
         URL url = null;
@@ -87,9 +79,9 @@ public final class Query {
     /**
      * Make an HTTP request to the given URL and return a String as the response.
      *
-     * @param url
-     * @return String
-     * @throws IOException
+     * @param url an URL.
+     * @return String containing the JSON response.
+     * @throws IOException when making a Http connection.
      */
     private static String makeHttpRequest(URL url) throws IOException {
         String jsonResponse = "";
@@ -156,7 +148,7 @@ public final class Query {
      * Return a {@link List} of {@link Book} objects by parsing a JSON String.
      * @param jsonString String to be parsed.
      */
-    public static ArrayList<Book> extractBooksfromJsonString(String jsonString) {
+    private static ArrayList<Book> extractBooksfromJsonString(String jsonString) {
 
         if (jsonString == null || jsonString.isEmpty()) {
             return null;
@@ -178,7 +170,6 @@ public final class Query {
 
         try {
             JSONObject base = new JSONObject(jsonString);
-//            JSONObject response = base.getJSONObject(KIND);
 
             String title = "";
             String authors = "";

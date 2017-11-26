@@ -6,9 +6,8 @@
     <string name="search_enter">Enter keywords</string>
     <string name="please_enter">Please enter keywords</string>
 
-    <string name="no_internet">No Internet connection</string>
-
-    <string name="minus">-</string>
+    <string name="no_internet_connection">No Internet connection</string>
+    <string name="no_book_data">No book data found.</string>
 
 
 </resources>

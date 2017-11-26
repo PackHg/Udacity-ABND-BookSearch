@@ -15,6 +15,7 @@
         android:orientation="horizontal"
         android:padding="@dimen/activity_margin_half">
 
+        <!-- For user to enter keywords to search for -->
         <EditText
             android:id="@+id/user_entered_text"
             android:layout_width="0dp"
@@ -23,6 +24,7 @@
             android:hint="@string/search_enter"
             android:inputType="text" />
 
+        <!-- Search button-->
         <ImageButton
             android:id="@+id/button_search"
             android:layout_width="wrap_content"
@@ -36,9 +38,41 @@
 
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/list_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <!--<RelativeLayout-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:gravity="center">-->
+
+        <!-- List of books -->
+        <ListView
+            android:id="@+id/list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/activity_margin_half"
+            android:divider="@null"
+            android:dividerHeight="@dimen/activity_margin"
+            android:drawSelectorOnTop="true"
+            android:orientation="vertical" />
+
+        <!-- Empty view which is visible when the list has no items -->
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/activity_margin"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:text="@string/no_book_data" />
+
+        <!-- Loading indicator -->
+        <ProgressBar
+            android:id="@+id/loading_spinner"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/activity_margin"/>
+
+    <!--</RelativeLayout>-->
 
 </LinearLayout>

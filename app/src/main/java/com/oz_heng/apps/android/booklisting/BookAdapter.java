@@ -44,7 +44,7 @@ public class BookAdapter extends ArrayAdapter<Book> {
                     false);
             holder = new ViewHolder();
 
-            holder.thumbnail = (ImageView) convertView.findViewById(R.id.thumbmail);
+            holder.thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
             holder.title = (TextView) convertView.findViewById(R.id.title);
             holder.authors = (TextView) convertView.findViewById(R.id.authors);
             holder.publishedIn = (TextView) convertView.findViewById(R.id.published_in);
