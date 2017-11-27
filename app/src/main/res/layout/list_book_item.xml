@@ -9,6 +9,7 @@
         android:id="@+id/thumbnail"
         android:layout_width="@dimen/thumbnail_width"
         android:layout_height="@dimen/thumbnail_height"
+        android:contentDescription="@string/front_cover"
         android:scaleType="centerCrop" />
 
     <LinearLayout

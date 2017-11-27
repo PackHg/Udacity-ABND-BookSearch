@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import java.util.ArrayList;
 
 import static com.oz_heng.apps.android.booklisting.Utils.Helper.getYearfrom;
@@ -54,11 +55,23 @@ public class BookAdapter extends ArrayAdapter<Book> {
 
         Book book = getItem(position);
 
-        holder.thumbnail.setImageBitmap(book.getThumbnail());
-        holder.title.setText(book.getTitle());
-        holder.authors.setText(book.getAuthors());
-        holder.publishedIn.setText(getYearfrom(book.getPublishedDate()));
-        holder.description.setText(book.getDescription());
+        if (book != null) {
+            if (book.getThumbnail() != null) {
+                holder.thumbnail.setImageBitmap(book.getThumbnail());
+            }
+            holder.title.setText(book.getTitle());
+            if (!book.getAuthors().isEmpty()) {
+                holder.authors.setText(book.getAuthors());
+            } else {
+                holder.authors.setText(R.string.author_unknown);
+            }
+            if (!book.getAuthors().isEmpty()) {
+                holder.publishedIn.setText(getYearfrom(book.getPublishedDate()));
+            } else {
+                holder.publishedIn.setText(R.string.published_date_unknown);
+            }
+            holder.description.setText(book.getDescription());
+        }
 
         return convertView;
     }

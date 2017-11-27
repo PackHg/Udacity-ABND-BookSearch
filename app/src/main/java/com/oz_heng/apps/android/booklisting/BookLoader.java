@@ -2,6 +2,7 @@ package com.oz_heng.apps.android.booklisting;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
 
 import java.util.List;
 
@@ -34,9 +35,10 @@ public class BookLoader extends AsyncTaskLoader<List<Book>> {
      */
     @Override
     public List<Book> loadInBackground() {
-        if (mUrl == null) {
+        if (mUrl == null || mUrl.isEmpty()) {
             return null;
         }
+        Log.v(LOG_TAG, "loadInBackground() - mUrl: " + mUrl);
 
         return fetchBookData(mUrl);
     }
@@ -46,6 +48,9 @@ public class BookLoader extends AsyncTaskLoader<List<Book>> {
      */
     @Override
     protected void onStartLoading() {
+
+        Log.v(LOG_TAG, "onStartLoading()");
+
         forceLoad();
     }
 }

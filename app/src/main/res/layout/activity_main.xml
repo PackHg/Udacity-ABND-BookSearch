@@ -38,10 +38,11 @@
 
     </LinearLayout>
 
-    <!--<RelativeLayout-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:gravity="center">-->
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center">
 
         <!-- List of books -->
         <ListView
@@ -59,10 +60,11 @@
             android:id="@+id/empty_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:layout_gravity="center"
             android:layout_marginTop="@dimen/activity_margin"
             android:textAppearance="?android:textAppearanceMedium"
-            android:text="@string/no_book_data" />
+            tools:text="@string/no_book_data" />
 
         <!-- Loading indicator -->
         <ProgressBar
@@ -70,9 +72,10 @@
             style="@style/Widget.AppCompat.ProgressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:layout_gravity="center"
-            android:layout_marginTop="@dimen/activity_margin"/>
+            android:layout_marginTop="@dimen/activity_margin" />
 
-    <!--</RelativeLayout>-->
+    </RelativeLayout>
 
 </LinearLayout>

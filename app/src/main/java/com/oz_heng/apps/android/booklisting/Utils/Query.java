@@ -41,6 +41,8 @@ public final class Query {
      */
     public static List<Book> fetchBookData(String urlString) {
 
+        Log.v(LOG_TAG, "fetchBookData() - urlString: " + urlString);
+
         // Create URL object
         URL url = createUrl(urlString);
 
@@ -84,6 +86,9 @@ public final class Query {
      * @throws IOException when making a Http connection.
      */
     private static String makeHttpRequest(URL url) throws IOException {
+
+        Log.v(LOG_TAG, "makeHttpRequest()");
+
         String jsonResponse = "";
 
         // if the url argument is null then return early.
@@ -149,6 +154,8 @@ public final class Query {
      * @param jsonString String to be parsed.
      */
     private static ArrayList<Book> extractBooksfromJsonString(String jsonString) {
+
+        Log.v(LOG_TAG, "extractBooksfromJsonString()");
 
         if (jsonString == null || jsonString.isEmpty()) {
             return null;
@@ -220,6 +227,12 @@ public final class Query {
                         Log.e(LOG_TAG, "Problem in parsing the JSON string", e);
                     }
                 }
+
+                if (title.isEmpty()) {
+                    // If title is empty go to next loop interation.
+                    continue;
+                }
+
                 bookArrayList.add(new Book(title, authors, publishedDate, description, bookUrl,
                         thumbnailImage));
             }

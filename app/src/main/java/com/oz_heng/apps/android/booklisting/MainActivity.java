@@ -20,7 +20,8 @@ import java.util.List;
 import static com.oz_heng.apps.android.booklisting.Utils.Helper.showToast;
 import static com.oz_heng.apps.android.booklisting.Utils.Query.isNetworkConnected;
 
-// TODO: handle case "JSONException: No value for authors"?
+// Done: handle case "JSONException: No value for authors".
+// TODO: No progress bar upon search following the 1st seacrh.
 
 public class MainActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<List<Book>> {
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity
      * Search based on the text entered by the user.
      */
     private void search() {
+        mEmptyView.setText("");
         mEmptyView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
 
@@ -103,16 +105,21 @@ public class MainActivity extends AppCompatActivity
         }
         Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
 
+        // Clear previous book data in ListView.
+        mBookAdapter.clear();
+
         // If there's network connection, fetch the data.
         if (isNetworkConnected(MainActivity.this)) {
             LoaderManager loaderManager = getLoaderManager();
 
             if (mIsFirstSearch) {
                 loaderManager.initLoader(BOOK_LOADER_ID, null, MainActivity.this);
-                Log.v(LOG_TAG, "loaderManager.initLoader");
+                Log.v(LOG_TAG, "Called loaderManager.initLoader()");
                 mIsFirstSearch = false;
             } else {
+                // Restart the loader.
                 loaderManager.restartLoader(BOOK_LOADER_ID, null,MainActivity.this);
+                Log.v(LOG_TAG, "Called loaderManager.restartLoader()");
             }
         } else {
             mProgressBar.setVisibility(View.GONE);
@@ -137,6 +144,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
 
+        Log.v(LOG_TAG, "onLoadFinished()");
+
         mProgressBar.setVisibility(View.GONE);
 
         // Clear the adapter of preview book data.
@@ -157,6 +166,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(Loader<List<Book>> loader) {
+        Log.v(LOG_TAG, "onLoaderReset()");
         mBookAdapter.clear();
     }
 
