@@ -41,7 +41,7 @@ public final class Query {
      */
     public static List<Book> fetchBookData(String urlString) {
 
-        Log.v(LOG_TAG, "fetchBookData() - urlString: " + urlString);
+        Log.v(LOG_TAG, "PH: fetchBookData(), urlString: " + urlString);
 
         // Create URL object
         URL url = createUrl(urlString);
@@ -87,7 +87,7 @@ public final class Query {
      */
     private static String makeHttpRequest(URL url) throws IOException {
 
-        Log.v(LOG_TAG, "makeHttpRequest()");
+        Log.v(LOG_TAG, "PH: makeHttpRequest().");
 
         String jsonResponse = "";
 
@@ -155,7 +155,7 @@ public final class Query {
      */
     private static ArrayList<Book> extractBooksfromJsonString(String jsonString) {
 
-        Log.v(LOG_TAG, "extractBooksfromJsonString()");
+        Log.v(LOG_TAG, "PH: extractBooksfromJsonString().");
 
         if (jsonString == null || jsonString.isEmpty()) {
             return null;

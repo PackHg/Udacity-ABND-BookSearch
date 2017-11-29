@@ -38,7 +38,7 @@ public class BookLoader extends AsyncTaskLoader<List<Book>> {
         if (mUrl == null || mUrl.isEmpty()) {
             return null;
         }
-        Log.v(LOG_TAG, "loadInBackground() - mUrl: " + mUrl);
+        Log.v(LOG_TAG, "PH: loadInBackground(), mUrl: " + mUrl);
 
         return fetchBookData(mUrl);
     }
@@ -49,7 +49,7 @@ public class BookLoader extends AsyncTaskLoader<List<Book>> {
     @Override
     protected void onStartLoading() {
 
-        Log.v(LOG_TAG, "onStartLoading()");
+        Log.v(LOG_TAG, "PH: onStartLoading().");
 
         forceLoad();
     }

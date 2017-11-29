@@ -3,6 +3,7 @@ package com.oz_heng.apps.android.booklisting;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import static com.oz_heng.apps.android.booklisting.Utils.Helper.getYearfrom;
  * source, which is an {@link ArrayList<Book>}.
  */
 public class BookAdapter extends ArrayAdapter<Book> {
+    private static final String LOG_TAG = BookAdapter.class.getSimpleName();
+
     public BookAdapter(@NonNull Context context, @NonNull ArrayList<Book> books) {
         super(context, 0, books);
     }
@@ -35,6 +38,8 @@ public class BookAdapter extends ArrayAdapter<Book> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+        Log.v(LOG_TAG, "PH: getView().");
 
         ViewHolder holder;
 

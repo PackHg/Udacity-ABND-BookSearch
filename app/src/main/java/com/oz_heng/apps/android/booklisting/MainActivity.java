@@ -2,6 +2,7 @@ package com.oz_heng.apps.android.booklisting;
 
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -21,24 +23,31 @@ import static com.oz_heng.apps.android.booklisting.Utils.Helper.showToast;
 import static com.oz_heng.apps.android.booklisting.Utils.Query.isNetworkConnected;
 
 // Done: handle case "JSONException: No value for authors".
-// TODO: No progress bar upon search following the 1st seacrh.
+// Done: No progress bar upon search following the 1st search.
+// TODO: After returning from the cliecked book's webpage, the search is restarting again. To fix?
 
 public class MainActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<List<Book>> {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    // Base URL for querying Google Book API
+    /** Base URL for querying Google Book API */
     private static final String GOOGLE_BOOK_API_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes?";
 
-    // Constant value for the book loader ID
+    /** Constant value for the book loader ID */
     private static final int BOOK_LOADER_ID = 1;
 
-    // Query text entered by the user.
-    private String mUserQueryText;
-    // Keywords entered by the user.
+    /** Key for saving mUserQueryText String variable with the instance state */
+    private static final String KEY_USER_QUERY_TEXT = "user query text";
+    /** Key for saving mIsFirstSearch boolean variable with the instance state */
+    private static final String KEY_IS_FIST_SEARCH = "is it first search";
+
+    /** Query text entered by the user */
+    private String mUserQueryText = "";
+    /** Keywords entered by the user */
     private String mUserKeywords;
-    // Is it the first search?
-    private boolean mIsFirstSearch;
+    /** Is it the first search? */
+    private boolean mIsFirstSearch = true;
+
 
     // Text view that is displayed when the listView is empty.
     private TextView mEmptyView;
@@ -51,6 +60,13 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.v(LOG_TAG, "PH: onCreate()");
+
+        if (savedInstanceState != null) {
+            mUserQueryText = savedInstanceState.getString(KEY_USER_QUERY_TEXT, mUserQueryText);
+//            mIsFirstSearch = savedInstanceState.getBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
+        }
 
         mIsFirstSearch = true;
 
@@ -75,12 +91,54 @@ public class MainActivity extends AppCompatActivity
 
         mProgressBar = findViewById(R.id.loading_spinner);
         mProgressBar.setVisibility(View.GONE);
+
+        // Set a click listener to open the webpage url to see additional details on the
+        // book the user clicks on.
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                Log.v(LOG_TAG, "PH: ListView, onItemClick().");
+
+                Book book = mBookAdapter.getItem(i);
+                if (book != null) {
+                    Intent intent  = new Intent(Intent.ACTION_VIEW, Uri.parse(book.getUrl()));
+                    startActivity(intent);
+                }
+            }
+        });
+
+        if (!mUserQueryText.isEmpty()) {
+            // If there's network connection, fetch the data.
+            if (isNetworkConnected(MainActivity.this)) {
+                LoaderManager loaderManager = getLoaderManager();
+
+                loaderManager.initLoader(BOOK_LOADER_ID, null, this);
+                Log.v(LOG_TAG, "PH: loaderManager.initLoader() has been called");
+            } else {
+                mProgressBar.setVisibility(View.GONE);
+                mEmptyView.setVisibility(View.VISIBLE);
+                mEmptyView.setText(R.string.no_internet_connection);
+            }
+        }
+
+        hideSoftKeyboard();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(KEY_USER_QUERY_TEXT, mUserQueryText);
+//        outState.putBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
+        super.onSaveInstanceState(outState);
     }
 
     /**
      * Search based on the text entered by the user.
      */
     private void search() {
+        Log.v(LOG_TAG, "PH: search().");
+
         mEmptyView.setText("");
         mEmptyView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -105,21 +163,21 @@ public class MainActivity extends AppCompatActivity
         }
         Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
 
-        // Clear previous book data in ListView.
-        mBookAdapter.clear();
+//        // Clear previous book data in ListView.
+//        mBookAdapter.clear();
 
         // If there's network connection, fetch the data.
         if (isNetworkConnected(MainActivity.this)) {
             LoaderManager loaderManager = getLoaderManager();
 
             if (mIsFirstSearch) {
-                loaderManager.initLoader(BOOK_LOADER_ID, null, MainActivity.this);
-                Log.v(LOG_TAG, "Called loaderManager.initLoader()");
+                loaderManager.initLoader(BOOK_LOADER_ID, null, this);
+                Log.v(LOG_TAG, "PH: loaderManager.initLoader() has been called");
                 mIsFirstSearch = false;
             } else {
                 // Restart the loader.
-                loaderManager.restartLoader(BOOK_LOADER_ID, null,MainActivity.this);
-                Log.v(LOG_TAG, "Called loaderManager.restartLoader()");
+                loaderManager.restartLoader(BOOK_LOADER_ID, null,this);
+                Log.v(LOG_TAG, "PH: loaderManager.restartLoader() has been called.");
             }
         } else {
             mProgressBar.setVisibility(View.GONE);
@@ -135,7 +193,7 @@ public class MainActivity extends AppCompatActivity
          Uri.Builder uriBuilder = baseUri.buildUpon();
          uriBuilder.appendQueryParameter("q", mUserKeywords);
 
-         Log.v(LOG_TAG, "onCreateLoader - uriBuilder.toString(): " + uriBuilder.toString());
+         Log.v(LOG_TAG, "PH: onCreateLoader - uriBuilder.toString(): " + uriBuilder.toString());
 
          // Create a new loader for the given URL
         return new BookLoader(this, uriBuilder.toString());
@@ -144,7 +202,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
 
-        Log.v(LOG_TAG, "onLoadFinished()");
+        Log.v(LOG_TAG, "PH: onLoadFinished().");
 
         mProgressBar.setVisibility(View.GONE);
 
@@ -152,9 +210,8 @@ public class MainActivity extends AppCompatActivity
         mBookAdapter.clear();
 
         if (books != null && !books.isEmpty()) {
-            showToast(this, "onLoadFinished() - Json response has been fetched. See Logcat.");
             for (int i = 0; i < books.size(); i++) {
-                Log.v(LOG_TAG, "onLoadFinished - Books(" + i + "): " +
+                Log.v(LOG_TAG, "PH: onLoadFinished - Books(" + i + "): " +
                         books.get(i).toString());
             }
             mBookAdapter.addAll(books);
@@ -166,7 +223,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(Loader<List<Book>> loader) {
-        Log.v(LOG_TAG, "onLoaderReset()");
+        Log.v(LOG_TAG, "PH: onLoaderReset()");
         mBookAdapter.clear();
     }
 

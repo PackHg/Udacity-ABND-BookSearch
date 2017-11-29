@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
  * Book data.
  */
 public class Book {
+    private static final String LOG_TAG = Book.class.getSimpleName();
+
     private String mTitle;
     private String mAuthors;
     private String mPublishedDate;
