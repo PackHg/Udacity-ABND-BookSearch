@@ -4,11 +4,15 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -20,6 +24,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.oz_heng.apps.android.booklisting.Utils.Helper.getKeywordsfrom;
 import static com.oz_heng.apps.android.booklisting.Utils.Helper.showToast;
 import static com.oz_heng.apps.android.booklisting.Utils.Query.isNetworkConnected;
 
@@ -38,10 +43,11 @@ public class MainActivity extends AppCompatActivity
     /** Constant value for the book loader ID */
     private static final int BOOK_LOADER_ID = 1;
 
-    /** Key for saving mUserQueryText String variable with the instance state */
+    /** Tag used to save user data in SharedPreferences */
+    private static final String USER_DATA = "com.oz_heng.apps.android.booklisting.user_data";
+    /** Key for saving mUserQueryText String variable */
     private static final String KEY_USER_QUERY_TEXT = "user query text";
-    /** Key for saving mIsFirstSearch boolean variable with the instance state */
-    private static final String KEY_IS_FIST_SEARCH = "is it first search";
+
 
     /** Query text entered by the user */
     private String mUserQueryText = "";
@@ -70,12 +76,10 @@ public class MainActivity extends AppCompatActivity
 
         Log.v(LOG_TAG, "PH: onCreate()");
 
-        if (savedInstanceState != null) {
-            mUserQueryText = savedInstanceState.getString(KEY_USER_QUERY_TEXT, mUserQueryText);
-//            mIsFirstSearch = savedInstanceState.getBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
-        }
-
-        mIsFirstSearch = true;
+//        if (savedInstanceState != null) {
+//            mUserQueryText = savedInstanceState.getString(KEY_USER_QUERY_TEXT, mUserQueryText);
+////            mIsFirstSearch = savedInstanceState.getBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
+//        }
 
         // Set the search button to trigger the appropriate action.
         ImageButton searchButton = findViewById(R.id.button_search);
@@ -115,7 +119,17 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // Restore mUserQueryText from SharedPreferences.
+        SharedPreferences sp = getSharedPreferences(USER_DATA, 0);
+        if (sp != null) {
+            mUserQueryText = sp.getString(KEY_USER_QUERY_TEXT, mUserQueryText);
+        }
+
+        mIsFirstSearch = true;
+
         if (!mUserQueryText.isEmpty()) {
+            mUserKeywords = getKeywordsfrom(mUserQueryText);
+
             // If there's network connection, fetch the data.
             if (isNetworkConnected(MainActivity.this)) {
                 LoaderManager loaderManager = getLoaderManager();
@@ -139,12 +153,12 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(KEY_USER_QUERY_TEXT, mUserQueryText);
-//        outState.putBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
-        super.onSaveInstanceState(outState);
-    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        outState.putString(KEY_USER_QUERY_TEXT, mUserQueryText);
+////        outState.putBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
+//        super.onSaveInstanceState(outState);
+//    }
 
     @Override
     protected void onPause() {
@@ -155,12 +169,16 @@ public class MainActivity extends AppCompatActivity
         mState = mListView.onSaveInstanceState();
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//
-//        hideSoftKeyboard();
-//    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Save mUserQueryText in SharedPreferences.
+        SharedPreferences sp = getSharedPreferences(USER_DATA, 0);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(KEY_USER_QUERY_TEXT, mUserQueryText);
+        editor.apply();
+    }
 
     /**
      * Search based on the text entered by the user.
@@ -185,11 +203,7 @@ public class MainActivity extends AppCompatActivity
         hideSoftKeyboard();
 
         // Split the entered text into keywords.
-        String[] keywords  =  mUserQueryText.split("\\s+");
-        mUserKeywords = keywords[0];
-        for (int i=1; i < keywords.length; i++) {
-            mUserKeywords = mUserKeywords.concat("+" + keywords[i]);
-        }
+        mUserKeywords = getKeywordsfrom(mUserQueryText);
         Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
 
 //        // Clear previous book data in ListView.
@@ -218,11 +232,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public Loader<List<Book>> onCreateLoader(int i, Bundle bundle) {
 
-         Uri baseUri = Uri.parse(GOOGLE_BOOK_API_REQUEST_URL);
-         Uri.Builder uriBuilder = baseUri.buildUpon();
-         uriBuilder.appendQueryParameter("q", mUserKeywords);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        String maxResults = sp.getString(getString(R.string.settings_max_results_key),
+                getString(R.string.settings_max_results_default));
 
-         Log.v(LOG_TAG, "PH: onCreateLoader - uriBuilder.toString(): " + uriBuilder.toString());
+        Uri baseUri = Uri.parse(GOOGLE_BOOK_API_REQUEST_URL);
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+        uriBuilder.appendQueryParameter("q", mUserKeywords);
+        uriBuilder.appendQueryParameter("maxResults", maxResults);
+
+        Log.v(LOG_TAG, "PH: onCreateLoader - maxResults: " + maxResults);
+        Log.v(LOG_TAG, "PH: onCreateLoader - uriBuilder.toString(): " + uriBuilder.toString());
 
          // Create a new loader for the given URL
         return new BookLoader(this, uriBuilder.toString());
@@ -254,6 +274,23 @@ public class MainActivity extends AppCompatActivity
     public void onLoaderReset(Loader<List<Book>> loader) {
         Log.v(LOG_TAG, "PH: onLoaderReset()");
         mBookAdapter.clear();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**

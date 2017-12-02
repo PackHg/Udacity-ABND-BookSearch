@@ -35,4 +35,23 @@ public final class Helper {
         return text.trim().substring(0, 4);
     }
 
+    /**
+     * Return a String of keywords in the format "keyword1+keyword2+...". If the String parameter
+     * is empty, return an empty String.
+     * @param s String parameter.
+     * @return a String of keywords.
+     */
+    public static String getKeywordsfrom(String s) {
+        if (s.isEmpty()) {
+            return "";
+        }
+
+        String[] keywordArray  =  s.split("\\s+");
+        String  keywords = keywordArray[0];
+        for (int i=1; i < keywordArray.length; i++) {
+            keywords = keywords.concat("+" + keywordArray[i]);
+        }
+        return keywords;
+    }
+
 }

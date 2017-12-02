@@ -50,7 +50,7 @@ public final class Query {
         String jsonResponse = null;
         try {
             jsonResponse = makeHttpRequest(url);
-            Log.v(LOG_TAG, "jsonResponse :" + jsonResponse);
+            Log.v(LOG_TAG, "PH: jsonResponse :" + jsonResponse);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }

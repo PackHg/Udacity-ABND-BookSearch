@@ -1,17 +1,38 @@
 <resources>
     <string name="app_name">Book Search</string>
 
-    <string name="search">Search</string>
+    <!-- Content description of the button search [CHAR LIMIT=NONE] -->
     <string name="search_button">Search button</string>
-    <string name="search_enter">Enter keywords</string>
-    <string name="please_enter">Please enter keywords</string>
-
-    <string name="no_internet_connection">No Internet connection</string>
-    <string name="no_book_data">No book data found</string>
-
+    <!-- Content description of the thumbnail ImageView [CHAR LIMIT=NONE] -->
     <string name="front_cover">Front cover</string>
+    <!-- Hint for the EditText used to enter keywords to search for [CHAR LIMIT=30] -->
+    <string name="search_enter">Enter keywords</string>
+    <!-- Toast message alerting the user to enter keywords [CHAR LIMIT=NONE] -->
+    <string name="please_enter">Please enter keywords.</string>
 
-    <string name="author_unknown">No author data</string>
-    <string name="published_date_unknown">No published in date data</string>
+    <!-- Text to display in the list when there is no Internet connection [CHAR LIMIT=NONE] -->
+    <string name="no_internet_connection">No Internet connection.</string>
+    <!-- Text to display in the list when there are no books [CHAR LIMIT=NONE] -->
+    <string name="no_book_data">No book data found.</string>
+
+    <!-- Text to display in the list book item when there's no author data [CHAR LIMIT=30] -->
+    <string name="author_unknown">No author data.</string>
+    <!-- Text to display in the list book item when there's no published in date data [CHAR LIMIT=30] -->
+    <string name="published_date_unknown">No published in date data.</string>
+
+    <!-- Settings Activity Title -->
+    <string name="title_activity_settings">Settings</string>
+    <!-- Settings Menu Item -->
+    <string name="settings_menu_item">Settings</string>
+
+    <!-- Strings for Maximum Results Preference [CHAR LIMIT=30] -->
+    <string name="settings_max_results_label">Maximum Results</string>
+    <string name="settings_max_results_key" translatable="false">max_results</string>
+    <string name="settings_max_results_default" translatable="false">10</string>
+
+    <!-- Toast message alerting the number of results is 40 [CHAR LIMIT=30]-->
+    <string name="min_nbr_results">The minimum number of results is 1.</string>
+    <!-- Toast message alerting the number of results is 40 [CHAR LIMIT=30]-->
+    <string name="max_nbr_results">The maximum number of results is 40.</string>
 
 </resources>

@@ -3,7 +3,6 @@ package com.oz_heng.apps.android.booklisting;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +38,7 @@ public class BookAdapter extends ArrayAdapter<Book> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 
-        Log.v(LOG_TAG, "PH: getView().");
+//        Log.v(LOG_TAG, "PH: getView().");
 
         ViewHolder holder;
 
