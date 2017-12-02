@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -24,7 +25,8 @@ import static com.oz_heng.apps.android.booklisting.Utils.Query.isNetworkConnecte
 
 // Done: handle case "JSONException: No value for authors".
 // Done: No progress bar upon search following the 1st search.
-// TODO: After returning from the cliecked book's webpage, the search is restarting again. To fix?
+// Normal: After returning from the cliecked book's webpage, the search is restarting again. To fix?
+// TODO: Increase timeout with http connection?
 
 public class MainActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<List<Book>> {
@@ -48,13 +50,18 @@ public class MainActivity extends AppCompatActivity
     /** Is it the first search? */
     private boolean mIsFirstSearch = true;
 
+    /** ListView of books */
+    ListView mListView;
 
-    // Text view that is displayed when the listView is empty.
+    /** Text view that is displayed when the listView is empty */
     private TextView mEmptyView;
-    // Loading idicator.
+    /** Loading indicator */
     private View mProgressBar;
 
     private BookAdapter mBookAdapter;
+
+    /** For saving the listView state */
+    Parcelable mState;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -80,13 +87,13 @@ public class MainActivity extends AppCompatActivity
         });
 
         // Setup listView with a BookAdapter.
-        ListView listView = (ListView) findViewById(R.id.list_view);
+        mListView = (ListView) findViewById(R.id.list_view);
         mBookAdapter = new BookAdapter(this, new ArrayList<Book>());
-        listView.setAdapter(mBookAdapter);
+        mListView.setAdapter(mBookAdapter);
 
         // Set listView with an empty view.
         mEmptyView = findViewById(R.id.empty_view);
-        listView.setEmptyView(mEmptyView);
+        mListView.setEmptyView(mEmptyView);
         mEmptyView.setVisibility(View.GONE);
 
         mProgressBar = findViewById(R.id.loading_spinner);
@@ -94,7 +101,7 @@ public class MainActivity extends AppCompatActivity
 
         // Set a click listener to open the webpage url to see additional details on the
         // book the user clicks on.
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
@@ -122,7 +129,13 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        hideSoftKeyboard();
+        // Restore previous mState, including scroll position.
+        if (mState != null) {
+            Log.v(LOG_TAG, "PH: Restoring mListView state.");
+            mListView.onRestoreInstanceState(mState);
+        }
+
+//        hideSoftKeyboard();
     }
 
 
@@ -132,6 +145,22 @@ public class MainActivity extends AppCompatActivity
 //        outState.putBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
         super.onSaveInstanceState(outState);
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Save mListView state, including scroll position.
+        Log.v(LOG_TAG, "PH: onPause(), saving mListView state.");
+        mState = mListView.onSaveInstanceState();
+    }
+
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//
+//        hideSoftKeyboard();
+//    }
 
     /**
      * Search based on the text entered by the user.

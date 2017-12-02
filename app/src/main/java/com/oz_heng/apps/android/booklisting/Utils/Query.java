@@ -101,8 +101,8 @@ public final class Query {
 
         try {
             httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setReadTimeout(2000 /* milliseconds */);      // Instead of 1000 milliseconds
-            httpURLConnection.setConnectTimeout(3000 /* milliseconds */);   // Instead of 1500 milliseconds
+            httpURLConnection.setReadTimeout(4000 /* milliseconds */);
+            httpURLConnection.setConnectTimeout(6000 /* milliseconds */);
             httpURLConnection.setRequestMethod("GET");
             httpURLConnection.connect();
 
