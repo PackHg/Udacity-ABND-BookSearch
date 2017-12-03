@@ -6,8 +6,6 @@ import android.graphics.Bitmap;
  * Book data.
  */
 public class Book {
-    private static final String LOG_TAG = Book.class.getSimpleName();
-
     private String mTitle;
     private String mAuthors;
     private String mPublishedDate;
@@ -25,27 +23,27 @@ public class Book {
         mThumbnail = thumbnailImage;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return mTitle;
     }
 
-    public String getAuthors() {
+    String getAuthors() {
         return mAuthors;
     }
 
-    public String getPublishedDate() {
+    String getPublishedDate() {
         return mPublishedDate;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return mDescription;
     }
 
-    public String getUrl() {
+    String getUrl() {
         return mUrl;
     }
 
-    public Bitmap getThumbnail() {
+    Bitmap getThumbnail() {
         return mThumbnail;
     }
 

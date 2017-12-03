@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,14 +27,9 @@ import static com.oz_heng.apps.android.booklisting.Utils.Helper.getKeywordsfrom;
 import static com.oz_heng.apps.android.booklisting.Utils.Helper.showToast;
 import static com.oz_heng.apps.android.booklisting.Utils.Query.isNetworkConnected;
 
-// Done: handle case "JSONException: No value for authors".
-// Done: No progress bar upon search following the 1st search.
-// Normal: After returning from the cliecked book's webpage, the search is restarting again. To fix?
-// TODO: Increase timeout with http connection?
 
 public class MainActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<List<Book>> {
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     /** Base URL for querying Google Book API */
     private static final String GOOGLE_BOOK_API_REQUEST_URL = "https://www.googleapis.com/books/v1/volumes?";
@@ -50,13 +44,11 @@ public class MainActivity extends AppCompatActivity
 
     /** Query text entered by the user */
     private String mUserQueryText = "";
-    /** Keywords entered by the user */
+    /** Keywords used for search */
     private String mUserKeywords;
-//    /** Is it the first search? */
-//    private boolean mIsFirstSearch = true;
 
-    /** ListView of books */
-    ListView mListView;
+    /** {@link ListView} of {@link Book} */
+    private ListView mListView;
 
     /** Text view that is displayed when the listView is empty */
     private TextView mEmptyView;
@@ -66,14 +58,12 @@ public class MainActivity extends AppCompatActivity
     private BookAdapter mBookAdapter;
 
     /** For saving the listView state */
-    Parcelable mState;
+    private Parcelable mState;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Log.v(LOG_TAG, "PH: onCreate()");
 
         // Set the search button to trigger the appropriate action.
         ImageButton searchButton = findViewById(R.id.button_search);
@@ -102,9 +92,6 @@ public class MainActivity extends AppCompatActivity
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                Log.v(LOG_TAG, "PH: ListView, onItemClick().");
-
                 Book book = mBookAdapter.getItem(i);
                 if (book != null) {
                     Intent intent  = new Intent(Intent.ACTION_VIEW, Uri.parse(book.getUrl()));
@@ -119,8 +106,6 @@ public class MainActivity extends AppCompatActivity
             mUserQueryText = sp.getString(KEY_USER_QUERY_TEXT, mUserQueryText);
         }
 
-//        mIsFirstSearch = true;
-
         if (!mUserQueryText.isEmpty()) {
             // Restore text entered by the user.
             EditText userEditText = findViewById(R.id.user_entered_text);
@@ -129,26 +114,18 @@ public class MainActivity extends AppCompatActivity
 
             mUserKeywords = getKeywordsfrom(mUserQueryText);
 
-            // If there's network connection, fetch the data.
+            // If there's network connection, fetch book data.
             if (isNetworkConnected(MainActivity.this)) {
                 LoaderManager loaderManager = getLoaderManager();
 
                 loaderManager.initLoader(BOOK_LOADER_ID, null, this);
                 mProgressBar.setVisibility(View.VISIBLE);
-                Log.v(LOG_TAG, "PH: loaderManager.initLoader() has been called");
             } else {
                 mProgressBar.setVisibility(View.GONE);
                 mEmptyView.setVisibility(View.VISIBLE);
                 mEmptyView.setText(R.string.no_internet_connection);
             }
         }
-
-        // Restore previous mState, including scroll position.
-        if (mState != null) {
-            Log.v(LOG_TAG, "PH: Restoring mListView state.");
-            mListView.onRestoreInstanceState(mState);
-        }
-
     }
 
     @Override
@@ -156,7 +133,6 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
 
         // Save mListView state, including scroll position.
-        Log.v(LOG_TAG, "PH: onPause(), saving mListView state.");
         mState = mListView.onSaveInstanceState();
     }
 
@@ -175,8 +151,6 @@ public class MainActivity extends AppCompatActivity
      * Search based on the text entered by the user.
      */
     private void search() {
-        Log.v(LOG_TAG, "PH: search().");
-
         mEmptyView.setText("");
         mEmptyView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
@@ -193,16 +167,16 @@ public class MainActivity extends AppCompatActivity
 
         hideSoftKeyboard();
 
+        mBookAdapter.clear();
+
         // Split the entered text into keywords.
         mUserKeywords = getKeywordsfrom(mUserQueryText);
-        Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
 
         // If there's network connection, fetch the data.
         if (isNetworkConnected(MainActivity.this)) {
             LoaderManager loaderManager = getLoaderManager();
             loaderManager.restartLoader(BOOK_LOADER_ID, null,this);
 
-            Log.v(LOG_TAG, "PH: loaderManager.restartLoader() has been called.");
         } else {
             mProgressBar.setVisibility(View.GONE);
             mEmptyView.setVisibility(View.VISIBLE);
@@ -222,17 +196,12 @@ public class MainActivity extends AppCompatActivity
         uriBuilder.appendQueryParameter("q", mUserKeywords);
         uriBuilder.appendQueryParameter("maxResults", maxResults);
 
-        Log.v(LOG_TAG, "PH: onCreateLoader - maxResults: " + maxResults);
-        Log.v(LOG_TAG, "PH: onCreateLoader - uriBuilder.toString(): " + uriBuilder.toString());
-
-         // Create a new loader for the given URL
+        // Create a new loader for the given URL
         return new BookLoader(this, uriBuilder.toString());
     }
 
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
-
-        Log.v(LOG_TAG, "PH: onLoadFinished().");
 
         mProgressBar.setVisibility(View.GONE);
 
@@ -240,20 +209,20 @@ public class MainActivity extends AppCompatActivity
         mBookAdapter.clear();
 
         if (books != null && !books.isEmpty()) {
-            for (int i = 0; i < books.size(); i++) {
-                Log.v(LOG_TAG, "PH: onLoadFinished - Books(" + i + "): " +
-                        books.get(i).toString());
-            }
             mBookAdapter.addAll(books);
         } else {
             mEmptyView.setVisibility(View.VISIBLE);
             mEmptyView.setText(R.string.no_book_data);
         }
+
+        // Restore previous mState, including scroll position.
+        if (mState != null) {
+            mListView.onRestoreInstanceState(mState);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<List<Book>> loader) {
-        Log.v(LOG_TAG, "PH: onLoaderReset()");
         mBookAdapter.clear();
     }
 
@@ -277,7 +246,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Hide the Android soft keyboard.
      */
-    void hideSoftKeyboard() {
+    private void hideSoftKeyboard() {
         View view = this.getCurrentFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (view != null && imm != null) {

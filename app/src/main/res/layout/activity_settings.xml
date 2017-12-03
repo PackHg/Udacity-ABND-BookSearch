@@ -5,5 +5,4 @@
     android:name="com.oz_heng.apps.android.booklisting.SettingsActivity$BookPreferenceFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.oz_heng.apps.android.booklisting.SettingsActivity">
-</fragment>
+    tools:context="com.oz_heng.apps.android.booklisting.SettingsActivity"/>

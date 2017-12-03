@@ -5,7 +5,7 @@
     <string name="search_button">Search button</string>
     <!-- Content description of the thumbnail ImageView [CHAR LIMIT=NONE] -->
     <string name="front_cover">Front cover</string>
-    <!-- Hint for the EditText used to enter keywords to search for [CHAR LIMIT=30] -->
+    <!-- Hint for the EditText used to enter keywords for searching [CHAR LIMIT=30] -->
     <string name="search_enter">Enter keywords</string>
     <!-- Toast message alerting the user to enter keywords [CHAR LIMIT=NONE] -->
     <string name="please_enter">Please enter keywords.</string>

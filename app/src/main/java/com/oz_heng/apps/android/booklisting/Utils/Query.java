@@ -41,8 +41,6 @@ public final class Query {
      */
     public static List<Book> fetchBookData(String urlString) {
 
-        Log.v(LOG_TAG, "PH: fetchBookData(), urlString: " + urlString);
-
         // Create URL object
         URL url = createUrl(urlString);
 
@@ -50,12 +48,11 @@ public final class Query {
         String jsonResponse = null;
         try {
             jsonResponse = makeHttpRequest(url);
-            Log.v(LOG_TAG, "PH: jsonResponse :" + jsonResponse);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
 
-        //  Return a list of Books from the JSON response
+        //  Return a list of Books from the JSON response.
         return extractBooksfromJsonString(jsonResponse);
     }
 
@@ -86,8 +83,6 @@ public final class Query {
      * @throws IOException when making a Http connection.
      */
     private static String makeHttpRequest(URL url) throws IOException {
-
-        Log.v(LOG_TAG, "PH: makeHttpRequest().");
 
         String jsonResponse = "";
 
@@ -155,8 +150,6 @@ public final class Query {
      */
     private static ArrayList<Book> extractBooksfromJsonString(String jsonString) {
 
-        Log.v(LOG_TAG, "PH: extractBooksfromJsonString().");
-
         if (jsonString == null || jsonString.isEmpty()) {
             return null;
         }
@@ -196,14 +189,9 @@ public final class Query {
                     authors = "";
                     if (authorArray.length() > 0) {
                         authors = authors.concat(authorArray.getString(0));
-                        Log.v(LOG_TAG, "authorArray.getString(0): " +
-                                authorArray.getString(0));
                         for (int j = 1; j < authorArray.length(); j++) {
-                            Log.v(LOG_TAG, "authorArray.getString(" + j + "): "
-                                    + authorArray.getString(j));
                             authors = authors.concat(", " + authorArray.getString(j));
                         }
-                        Log.v(LOG_TAG, "authors: " + authors);
                     }
 
                     publishedDate = volumeInfo.getString(PUBLISHED_DATE);
@@ -263,10 +251,10 @@ public final class Query {
      * Load an image from a given URL and turn it into a Bitmap.
      * Return null if there's issue in getting the {@link Bitmap} or the src is empty.
      *
-     * @param srcUrl
-     * @return
+     * @param srcUrl Image source Url (a String).
+     * @return Image Bitmap.
      */
-    public static Bitmap getBitmapFromURL(String srcUrl) {
+    private static Bitmap getBitmapFromURL(String srcUrl) {
 
         if (srcUrl.isEmpty()) {
             return null;
