@@ -48,13 +48,12 @@ public class MainActivity extends AppCompatActivity
     /** Key for saving mUserQueryText String variable */
     private static final String KEY_USER_QUERY_TEXT = "user query text";
 
-
     /** Query text entered by the user */
     private String mUserQueryText = "";
     /** Keywords entered by the user */
     private String mUserKeywords;
-    /** Is it the first search? */
-    private boolean mIsFirstSearch = true;
+//    /** Is it the first search? */
+//    private boolean mIsFirstSearch = true;
 
     /** ListView of books */
     ListView mListView;
@@ -76,11 +75,6 @@ public class MainActivity extends AppCompatActivity
 
         Log.v(LOG_TAG, "PH: onCreate()");
 
-//        if (savedInstanceState != null) {
-//            mUserQueryText = savedInstanceState.getString(KEY_USER_QUERY_TEXT, mUserQueryText);
-////            mIsFirstSearch = savedInstanceState.getBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
-//        }
-
         // Set the search button to trigger the appropriate action.
         ImageButton searchButton = findViewById(R.id.button_search);
         searchButton.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +85,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         // Setup listView with a BookAdapter.
-        mListView = (ListView) findViewById(R.id.list_view);
+        mListView = findViewById(R.id.list_view);
         mBookAdapter = new BookAdapter(this, new ArrayList<Book>());
         mListView.setAdapter(mBookAdapter);
 
@@ -125,9 +119,14 @@ public class MainActivity extends AppCompatActivity
             mUserQueryText = sp.getString(KEY_USER_QUERY_TEXT, mUserQueryText);
         }
 
-        mIsFirstSearch = true;
+//        mIsFirstSearch = true;
 
         if (!mUserQueryText.isEmpty()) {
+            // Restore text entered by the user.
+            EditText userEditText = findViewById(R.id.user_entered_text);
+            userEditText.setText(mUserQueryText);
+            hideSoftKeyboard();
+
             mUserKeywords = getKeywordsfrom(mUserQueryText);
 
             // If there's network connection, fetch the data.
@@ -135,6 +134,7 @@ public class MainActivity extends AppCompatActivity
                 LoaderManager loaderManager = getLoaderManager();
 
                 loaderManager.initLoader(BOOK_LOADER_ID, null, this);
+                mProgressBar.setVisibility(View.VISIBLE);
                 Log.v(LOG_TAG, "PH: loaderManager.initLoader() has been called");
             } else {
                 mProgressBar.setVisibility(View.GONE);
@@ -149,16 +149,7 @@ public class MainActivity extends AppCompatActivity
             mListView.onRestoreInstanceState(mState);
         }
 
-//        hideSoftKeyboard();
     }
-
-
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        outState.putString(KEY_USER_QUERY_TEXT, mUserQueryText);
-////        outState.putBoolean(KEY_IS_FIST_SEARCH, mIsFirstSearch);
-//        super.onSaveInstanceState(outState);
-//    }
 
     @Override
     protected void onPause() {
@@ -206,22 +197,12 @@ public class MainActivity extends AppCompatActivity
         mUserKeywords = getKeywordsfrom(mUserQueryText);
         Log.v(LOG_TAG, "mUserKeywords: " + mUserKeywords);
 
-//        // Clear previous book data in ListView.
-//        mBookAdapter.clear();
-
         // If there's network connection, fetch the data.
         if (isNetworkConnected(MainActivity.this)) {
             LoaderManager loaderManager = getLoaderManager();
+            loaderManager.restartLoader(BOOK_LOADER_ID, null,this);
 
-            if (mIsFirstSearch) {
-                loaderManager.initLoader(BOOK_LOADER_ID, null, this);
-                Log.v(LOG_TAG, "PH: loaderManager.initLoader() has been called");
-                mIsFirstSearch = false;
-            } else {
-                // Restart the loader.
-                loaderManager.restartLoader(BOOK_LOADER_ID, null,this);
-                Log.v(LOG_TAG, "PH: loaderManager.restartLoader() has been called.");
-            }
+            Log.v(LOG_TAG, "PH: loaderManager.restartLoader() has been called.");
         } else {
             mProgressBar.setVisibility(View.GONE);
             mEmptyView.setVisibility(View.VISIBLE);
