@@ -96,7 +96,9 @@ public class MainActivity extends AppCompatActivity
                 if (book != null) {
                     if (!book.getUrl().isEmpty()) {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(book.getUrl()));
-                        startActivity(intent);
+                        if (intent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(intent);
+                        }
                     } else {
                         showToast(MainActivity.this, getString(R.string.no_link));
                     }
