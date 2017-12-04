@@ -9,16 +9,22 @@
     <string name="search_enter">Enter keywords</string>
     <!-- Toast message alerting the user to enter keywords [CHAR LIMIT=NONE] -->
     <string name="please_enter">Please enter keywords.</string>
+   <!-- Toast message alerting the user that link is unavailable for the list item he has clicked on [CHAR LIMIT=NONE] -->
+    <string name="no_link">Link is unavailable for this item.</string>
 
     <!-- Text to display in the list when there is no Internet connection [CHAR LIMIT=NONE] -->
     <string name="no_internet_connection">No Internet connection.</string>
     <!-- Text to display in the list when there are no books [CHAR LIMIT=NONE] -->
     <string name="no_book_data">No book data found.</string>
 
-    <!-- Text to display in the list book item when there's no author data [CHAR LIMIT=30] -->
-    <string name="author_unknown">No author data.</string>
-    <!-- Text to display in the list book item when there's no published in date data [CHAR LIMIT=30] -->
-    <string name="published_date_unknown">No published in date data.</string>
+    <!-- Text to display in the list book item when there's no title [CHAR LIMIT=30] -->
+    <string name="no_title">No title</string>
+    <!-- Text to display in the list book item when there's no author [CHAR LIMIT=30] -->
+    <string name="no_author">No author</string>
+    <!-- Text to display in the list book item when there's no published in date [CHAR LIMIT=30] -->
+    <string name="no_published_date">No published in date</string>
+    <!-- Text to display in the list book item when there's no description [CHAR LIMIT=30] -->
+    <string name="no_description">No description</string>
 
     <!-- Settings Activity Title -->
     <string name="title_activity_settings">Settings</string>

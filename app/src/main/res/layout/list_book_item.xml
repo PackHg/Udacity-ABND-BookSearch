@@ -22,38 +22,22 @@
 
         <TextView
             android:id="@+id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="@android:color/holo_blue_dark"
+            style="@style/TitleStyle"
             tools:text="Closing the Ring: The Second World War - Volume 5" />
 
         <TextView
             android:id="@+id/authors"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@android:color/holo_blue_dark"
-            android:textStyle="italic"
+            style="@style/AuthorStyle"
             tools:text="Winston S. Churchill" />
 
         <TextView
             android:id="@+id/published_in"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/darker_gray"
-            android:textStyle="italic"
+            style="@style/PublishedInStyle"
             tools:text="2000" />
 
         <TextView
             android:id="@+id/description"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:ellipsize="end"
-            android:maxLines="4"
+            style="@style/DescriptionStyle"
             tools:text="Sir Winston Churchill From the origins of the conflict, the rise of Hitler and thefutile attempts at appeasement, through the darkest days of Britain's lonestand against the Axis powers, the great alliances with the USA and SovietRussia " />
 
     </LinearLayout>

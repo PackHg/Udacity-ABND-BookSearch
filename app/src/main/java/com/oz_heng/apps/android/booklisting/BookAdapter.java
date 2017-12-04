@@ -60,18 +60,30 @@ public class BookAdapter extends ArrayAdapter<Book> {
             if (book.getThumbnail() != null) {
                 holder.thumbnail.setImageBitmap(book.getThumbnail());
             }
-            holder.title.setText(book.getTitle());
+
+            if(!book.getTitle().isEmpty()) {
+                holder.title.setText(book.getTitle());
+            } else {
+                holder.title.setText(R.string.no_title);
+            }
+
             if (!book.getAuthors().isEmpty()) {
                 holder.authors.setText(book.getAuthors());
             } else {
-                holder.authors.setText(R.string.author_unknown);
+                holder.authors.setText(R.string.no_author);
             }
+
             if (!book.getAuthors().isEmpty()) {
                 holder.publishedIn.setText(getYearfrom(book.getPublishedDate()));
             } else {
-                holder.publishedIn.setText(R.string.published_date_unknown);
+                holder.publishedIn.setText(R.string.no_published_date);
             }
-            holder.description.setText(book.getDescription());
+
+            if (!book.getDescription().isEmpty()) {
+                holder.description.setText(book.getDescription());
+            } else {
+                holder.description.setText(R.string.no_description);
+            }
         }
 
         return convertView;

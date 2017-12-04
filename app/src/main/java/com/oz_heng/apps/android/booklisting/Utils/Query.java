@@ -84,6 +84,10 @@ public final class Query {
      */
     private static String makeHttpRequest(URL url) throws IOException {
 
+        final int READ_TIMEOUT = 4000; /* milliseconds */
+        final int CONNECT_TIMEOUT = 6000; /* milliseconds */
+        final String GET = "GET";
+
         String jsonResponse = "";
 
         // if the url argument is null then return early.
@@ -96,9 +100,9 @@ public final class Query {
 
         try {
             httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setReadTimeout(4000 /* milliseconds */);
-            httpURLConnection.setConnectTimeout(6000 /* milliseconds */);
-            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setReadTimeout(READ_TIMEOUT);
+            httpURLConnection.setConnectTimeout(CONNECT_TIMEOUT);
+            httpURLConnection.setRequestMethod(GET);
             httpURLConnection.connect();
 
             // If the request is successful (response code HttpURLConnection.HTTP_OK)
@@ -154,8 +158,10 @@ public final class Query {
             return null;
         }
 
-        // Keys for parsing
-        final String KIND = "kind";
+        final String PROBLEM_PARSING_JSON_STRING = "Problem in parsing the JSON string";
+        final String EMPTY_STRING = "";
+
+        // Keys for parsing jsonString.
         final String ITEMS = "items";
         final String VOLUME_INFO = "volumeInfo";
         final String TITLE = "title";
@@ -171,61 +177,61 @@ public final class Query {
         try {
             JSONObject base = new JSONObject(jsonString);
 
-            String title = "";
-            String authors = "";
-            String publishedDate = "";
-            String bookUrl = "";
-            Bitmap thumbnailImage = null;
-            String description = "";
+            JSONArray items = base.optJSONArray(ITEMS);
+            if (items == null) {
+                return null;
+            }
 
-            JSONArray items = base.getJSONArray(ITEMS);
+            String title;
+            String authors;
+            String publishedDate;
+            String bookUrl;
+            Bitmap thumbnailImage;
+            String description;
+
             for (int i = 0; i < items.length(); i++) {
-                try {
-                    JSONObject volumeInfo = items.getJSONObject(i).getJSONObject(VOLUME_INFO);
+                JSONObject volumeInfo = items.optJSONObject(i).optJSONObject(VOLUME_INFO);
+                // If there is no volume info, continue with the next book item.
+                if (volumeInfo == null) {
+                    continue;
+                }
 
-                    // Parse title and authors.
-                    title = volumeInfo.getString(TITLE);
-                    JSONArray authorArray = volumeInfo.getJSONArray(AUTHORS);
-                    authors = "";
+                title = volumeInfo.optString(TITLE, EMPTY_STRING);
+
+                // Parse author(s).
+                authors = EMPTY_STRING;
+                JSONArray authorArray = volumeInfo.optJSONArray(AUTHORS);
+                if (authorArray != null) {
                     if (authorArray.length() > 0) {
                         authors = authors.concat(authorArray.getString(0));
                         for (int j = 1; j < authorArray.length(); j++) {
                             authors = authors.concat(", " + authorArray.getString(j));
                         }
                     }
+                }
 
-                    publishedDate = volumeInfo.getString(PUBLISHED_DATE);
+                publishedDate = volumeInfo.optString(PUBLISHED_DATE, EMPTY_STRING);
 
-                    // Get the thumbnail image.
-                    JSONObject imageLinks = volumeInfo.getJSONObject(IMAGE_LINKS);
-                    String thumbnailUrl = imageLinks.getString(THUMBNAIL);
-                    thumbnailImage = null;
-                    if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+                // Get the thumbnail Bitmap image.
+                thumbnailImage = null;
+                JSONObject imageLinks = volumeInfo.optJSONObject(IMAGE_LINKS);
+                if (imageLinks != null) {
+                    String thumbnailUrl = imageLinks.optString(THUMBNAIL, EMPTY_STRING);
+                    if (!thumbnailUrl.isEmpty()) {
                         thumbnailImage = getBitmapFromURL(thumbnailUrl);
                     }
-
-                    bookUrl = volumeInfo.getString(CANONICAL_VOULUME_LINK);
-                    description = volumeInfo.getString(DESCRIPTION);
-
-                }
-                catch (JSONException e) {
-                    if (e.getMessage().contains("No value for description")) {
-                        description = "";
-                    } else {
-                        Log.e(LOG_TAG, "Problem in parsing the JSON string", e);
-                    }
                 }
 
-                if (title.isEmpty()) {
-                    // If title is empty go to next loop interation.
-                    continue;
-                }
+                bookUrl = volumeInfo.optString(CANONICAL_VOULUME_LINK, EMPTY_STRING);
+                description = volumeInfo.optString(DESCRIPTION, EMPTY_STRING);
 
                 bookArrayList.add(new Book(title, authors, publishedDate, description, bookUrl,
                         thumbnailImage));
             }
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Problem in parsing the JSON string", e);
+            if (e.getMessage().contains(PROBLEM_PARSING_JSON_STRING)) {
+                return null;
+            }
         }
 
         return bookArrayList;

@@ -94,8 +94,12 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Book book = mBookAdapter.getItem(i);
                 if (book != null) {
-                    Intent intent  = new Intent(Intent.ACTION_VIEW, Uri.parse(book.getUrl()));
-                    startActivity(intent);
+                    if (!book.getUrl().isEmpty()) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(book.getUrl()));
+                        startActivity(intent);
+                    } else {
+                        showToast(MainActivity.this, getString(R.string.no_link));
+                    }
                 }
             }
         });
@@ -187,14 +191,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public Loader<List<Book>> onCreateLoader(int i, Bundle bundle) {
 
+        final String Q = "q";
+        final String MAX_RESULTS = "maxResults";
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         String maxResults = sp.getString(getString(R.string.settings_max_results_key),
                 getString(R.string.settings_max_results_default));
 
         Uri baseUri = Uri.parse(GOOGLE_BOOK_API_REQUEST_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
-        uriBuilder.appendQueryParameter("q", mUserKeywords);
-        uriBuilder.appendQueryParameter("maxResults", maxResults);
+        uriBuilder.appendQueryParameter(Q, mUserKeywords);
+        uriBuilder.appendQueryParameter(MAX_RESULTS, maxResults);
 
         // Create a new loader for the given URL
         return new BookLoader(this, uriBuilder.toString());
