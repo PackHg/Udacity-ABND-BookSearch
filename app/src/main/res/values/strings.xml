@@ -36,9 +36,9 @@
     <string name="settings_max_results_key" translatable="false">max_results</string>
     <string name="settings_max_results_default" translatable="false">10</string>
 
-    <!-- Toast message alerting the number of results is 40 [CHAR LIMIT=30]-->
+    <!-- Toast message alerting the minimum number of results is 1 [CHAR LIMIT=30]-->
     <string name="min_nbr_results">The minimum number of results is 1.</string>
-    <!-- Toast message alerting the number of results is 40 [CHAR LIMIT=30]-->
-    <string name="max_nbr_results">The maximum number of results is 40.</string>
+    <!-- Toast message alerting the maximum number of results is 50 [CHAR LIMIT=30]-->
+    <string name="max_nbr_results">The maximum number of results is 50.</string>
 
 </resources>
